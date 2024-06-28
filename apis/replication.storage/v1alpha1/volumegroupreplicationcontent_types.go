@@ -52,7 +52,7 @@ type VolumeGroupReplicationContentSpec struct {
 	// +optional
 	VolumeGroupSnapshotClassName string `json:"volumeGroupReplicationClassName"`
 
-	// Source specifies whether the snapshot is (or should be) dynamically provisioned
+	// Source specifieses whether the snapshot is (or should be) dynamically provisioned
 	// or already exists, and just requires a Kubernetes object representation.
 	// This field is immutable after creation.
 	// Required.
