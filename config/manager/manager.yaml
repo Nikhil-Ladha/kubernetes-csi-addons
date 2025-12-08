@@ -67,12 +67,9 @@ spec:
           # TODO(user): Configure the resources accordingly based on the project requirements.
           # More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
           resources:
-            limits:
-              cpu: 1000m
-              memory: 512Mi
             requests:
               cpu: 10m
-              memory: 64Mi
+              memory: 32Mi
       serviceAccountName: csi-addons-controller-manager
       terminationGracePeriodSeconds: 10
       tolerations:
