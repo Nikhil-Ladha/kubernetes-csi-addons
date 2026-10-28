@@ -55,7 +55,7 @@ const (
 
 var (
 	volumePromotionKnownErrors    = []codes.Code{codes.FailedPrecondition}
-	disableReplicationKnownErrors = []codes.Code{codes.NotFound}
+	disableReplicationKnownErrors = []codes.Code{codes.NotFound, codes.FailedPrecondition}
 	enableReplicationKnownErrors  = []codes.Code{codes.FailedPrecondition}
 	getReplicationInfoKnownErrors = []codes.Code{codes.NotFound}
 )
@@ -704,6 +704,18 @@ func (r *VolumeReplicationReconciler) disableVolumeReplication(vr *volumeReplica
 
 	if resp.Error != nil {
 		if isKnownError := resp.HasKnownGRPCError(disableReplicationKnownErrors); isKnownError {
+			if !util.IsNotFound(resp.Error) {
+				// force disable - it can also be used to issue a retry
+				vr.logger.Info("retry disabling volume due to known grpc error", "error", resp.Error)
+				volumeReplication.Params.Parameters["retry"] = "true"
+				resp := volumeReplication.Disable()
+				if resp.Error != nil {
+					vr.logger.Error(resp.Error, "failed to force disable volume")
+					setFailedDemotionCondition(&vr.instance.Status.Conditions, vr.instance.Generation, vr.instance.Spec.DataSource.Kind, "failed to force disable volume", resp.Error.Error())
+
+					return resp.Error
+				}
+			}
 			vr.logger.Info("volume not found", "volumeID", vr.commonRequestParameters.VolumeID)
 
 			return nil

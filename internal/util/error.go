@@ -55,3 +55,17 @@ func IsAbortedError(err error) bool {
 
 	return s.Code() == codes.Aborted
 }
+
+// IsNotFound returns true if the error is a gRPC Not Found error.
+func IsNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	s, ok := status.FromError(err)
+	if !ok {
+		return false
+	}
+
+	return s.Code() == codes.NotFound
+}
